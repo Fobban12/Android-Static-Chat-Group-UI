@@ -71,7 +71,7 @@ fun Header(Logout:LoginAndRegister)
 
 
     ) {
-        Text("News",Modifier
+        Text("Sky News",Modifier
             .padding(horizontal = 5.dp),
             fontWeight = FontWeight.Bold)
 
@@ -86,7 +86,7 @@ fun MainNavigation(navController: NavHostController)
     NavHost(navController = navController, startDestination = MAIN_ROUTE )
     {
         composable( route = MAIN_ROUTE ){ MainContentView() }
-        composable( route = NEWS_ROUTE){  }
+        composable( route = NEWS_ROUTE){ AddNewsComment() }
     }
 }
 
@@ -118,7 +118,10 @@ fun Footer(navController: NavHostController)
 
 }
 
-
+@Composable
+fun AddNewsComment(){
+    Text("Hello this is where you could add comment to a news text")
+}
 
 @Composable
 fun LoginView(userVM: LoginAndRegister){
@@ -144,7 +147,7 @@ fun LoginView(userVM: LoginAndRegister){
         OutlinedTextField(
             value = password ,
             onValueChange = { password = it },
-            label = { Text(text = "Password (Must be longer than 6)") },
+            label = { Text(text = "Password (More than 5 characters)") },
             visualTransformation = PasswordVisualTransformation()
         )
         OutlinedButton(onClick = { if (email.isNotEmpty() && password.isNotEmpty()){userVM.login(email,password)} else {println("Null or empty text fields")} }) {
