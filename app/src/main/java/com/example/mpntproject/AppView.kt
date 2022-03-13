@@ -22,6 +22,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 const val MAIN_ROUTE = "Info"
@@ -83,10 +85,12 @@ fun Header(Logout:LoginAndRegister)
 @Composable
 fun MainNavigation(navController: NavHostController)
 {
+    val commentVM = viewModel<AddComment>()
+    val userVM = viewModel<LoginAndRegister>()
     NavHost(navController = navController, startDestination = MAIN_ROUTE )
     {
         composable( route = MAIN_ROUTE ){ MainContentView() }
-        composable( route = NEWS_ROUTE){ AddNewsComment() }
+        composable( route = NEWS_ROUTE){ AddNewsComment(commentVM, userVM) }
     }
 }
 
@@ -119,8 +123,43 @@ fun Footer(navController: NavHostController)
 }
 
 @Composable
-fun AddNewsComment(){
-    Text("Hello this is where you could add comment to a news text")
+fun AddNewsComment(commentVM: AddComment, userVM: LoginAndRegister){
+   var commentText by remember { mutableStateOf("") }
+var i = 0
+    val fireStore = Firebase.firestore
+    val doc = mapOf<String, String>(
+        "user" to userVM.username.value,
+        "message" to commentText
+
+    )
+
+    Column(modifier = Modifier
+        .fillMaxSize()) 
+    {
+        OutlinedTextField(value = commentText
+            , onValueChange ={commentText=it}
+            , label = { Text(text = "Add Comment to news")} )
+
+        OutlinedButton(onClick = { if (commentText.isNotEmpty()){commentVM.addComment(Comment(commentText)); fireStore
+            .collection("comments")
+            .add(doc)} else {""}})
+        {
+            Text("Add comment")
+        }
+        commentVM.comments.value.forEach{
+        Text(text = it.comment)
+            Button(onClick = {commentVM.deleteComment(Comment(commentText)); fireStore
+                .collection("comments")
+
+                }, Modifier.width(600.dp)) {
+                Text("Remove comment")
+            }
+        }
+    }
+    
+    
+    
+    
 }
 
 @Composable
