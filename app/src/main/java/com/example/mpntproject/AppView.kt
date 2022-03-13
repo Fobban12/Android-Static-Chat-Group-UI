@@ -11,12 +11,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+
+const val MAIN_ROUTE = "Info"
+const val NEWS_ROUTE = "AddNewsInfo"
+
+
 
 
 @Composable
@@ -38,11 +49,12 @@ fun Mainview() {
 @Composable
 fun ScaffoldView()
 {
+    val navigation = rememberNavController()
     val userVM = viewModel<LoginAndRegister>()
     Scaffold(
         topBar = {Header(userVM)},
-        content = { MainContentView()},
-        bottomBar = { Footer()})
+        content = { MainNavigation(navigation) },
+        bottomBar = { Footer(navigation)})
 }
 
 
@@ -69,18 +81,38 @@ fun Header(Logout:LoginAndRegister)
     }
 }
 @Composable
+fun MainNavigation(navController: NavHostController)
+{
+    NavHost(navController = navController, startDestination = MAIN_ROUTE )
+    {
+        composable( route = MAIN_ROUTE ){ MainContentView() }
+        composable( route = NEWS_ROUTE){  }
+    }
+}
+
+@Composable
 fun MainContentView()
 {
     Column() {
         Text("The 'content' should be here")
     }
 
+
 }
 @Composable
-fun Footer()
+fun Footer(navController: NavHostController)
 {
-    Row() {
-        Text("The bottom bar or something should be here instead of this text")
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .background(Color.Cyan)
+        .padding(20.dp)
+        ,
+        horizontalArrangement = Arrangement.SpaceEvenly) {
+      Icon(painter = painterResource(id = R.drawable.ic_homefeed ),
+          contentDescription ="Info",
+          modifier = Modifier.clickable { navController.navigate(MAIN_ROUTE) })
+        Icon(painter = painterResource(id = R.drawable.icon_add), contentDescription = "AddNewsInfo",
+        Modifier.clickable { navController.navigate(NEWS_ROUTE)  })
     }
 
 
