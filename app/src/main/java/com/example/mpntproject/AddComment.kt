@@ -9,18 +9,8 @@ class AddComment: ViewModel() {
 
     fun addComment(comment: Comment)
     {
-    var newComment = comments.value.toMutableList()
+    val newComment = comments.value.toMutableList()
         newComment.add(comment)
         comments.value = newComment
     }
-
-    fun deleteComment(comment: Comment)
-    {
-    var newComment = comments.value.toMutableList()
-        newComment.remove(comment)
-        comments.value = newComment
-    }
-
-
-
 }
