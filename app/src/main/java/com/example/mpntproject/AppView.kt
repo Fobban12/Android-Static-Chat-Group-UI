@@ -2,6 +2,7 @@ package com.example.mpntproject
 
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,10 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
+import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -22,6 +27,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.getField
 import com.google.firebase.ktx.Firebase
 
 const val MAIN_ROUTE = "Info"
@@ -42,9 +50,6 @@ fun Mainview() {
     }
 
 }
-
-
-
 
 @Composable
 fun ScaffoldView()
@@ -73,9 +78,9 @@ fun Header(Logout:LoginAndRegister)
     ) {
         Text("Sky News",Modifier
             .padding(horizontal = 5.dp),
-            fontWeight = FontWeight.Bold)
+            fontWeight = Bold)
 
-        Text("Searchbar here")
+        Text("Searchbar?")
         Text("Logout", Modifier
             .clickable { Logout.logout() })
     }
@@ -83,18 +88,50 @@ fun Header(Logout:LoginAndRegister)
 @Composable
 fun MainNavigation(navController: NavHostController)
 {
+    val commentVM = viewModel<AddComment>()
+    val userVM = viewModel<LoginAndRegister>()
     NavHost(navController = navController, startDestination = MAIN_ROUTE )
     {
         composable( route = MAIN_ROUTE ){ MainContentView() }
-        composable( route = NEWS_ROUTE){ AddNewsComment() }
+        composable( route = NEWS_ROUTE){ AddNewsComment(commentVM, userVM) }
     }
 }
 
 @Composable
 fun MainContentView()
 {
-    Column() {
-        Text("The 'content' should be here")
+    var title by remember { mutableStateOf("")}
+    var shortInfo by remember { mutableStateOf("") }
+
+    val fireStore = Firebase.firestore
+
+
+    Column(modifier = Modifier
+        .padding(5.dp)
+        .height(500.dp)
+        .width(500.dp)
+        .border(1.dp, Color.Black),
+    horizontalAlignment = Alignment.CenterHorizontally)
+    {
+        //Gets info from database
+        fireStore
+            .collection("News")
+            .get()
+            .addOnSuccessListener {
+                for(doc in it)
+                {
+                 title = doc.get("Title").toString()
+                    shortInfo = doc.get("Short Info").toString()
+                }
+            }
+        Text(text = title, Modifier
+            .padding(20.dp),
+             fontWeight = ExtraBold, fontSize = 30.sp)
+        Image(painter = painterResource(id = R.drawable.war) , contentDescription ="",Modifier.size(350.dp), contentScale = ContentScale.FillHeight)
+        Text(text = shortInfo, Modifier.padding(20.dp))
+
+
+
     }
 
 
@@ -119,8 +156,37 @@ fun Footer(navController: NavHostController)
 }
 
 @Composable
-fun AddNewsComment(){
-    Text("Hello this is where you could add comment to a news text")
+fun AddNewsComment(commentVM: AddComment, userVM: LoginAndRegister){
+   var commentText by remember { mutableStateOf("") }
+    val fireStore = Firebase.firestore
+    val doc = mapOf<String, String>(
+        "message" to commentText
+
+    )
+
+    Column(modifier = Modifier
+        .fillMaxSize()) 
+    {
+        Text(text= "You are user "+userVM.username.value)
+        OutlinedTextField(value = commentText
+            , onValueChange ={commentText=it}
+            , label = { Text(text = "Add Comment to news")} )
+
+        OutlinedButton(onClick = { if (commentText.isNotEmpty()){commentVM.addComment(Comment(commentText)); fireStore
+            .collection("comments")
+            .document(userVM.username.value)
+            .set(doc)} else {}}, Modifier.padding(top = 5.dp))
+        {
+            Text("Add comment")
+        }
+        commentVM.comments.value.forEach{
+        Text(text = it.comment +"                  Comment by user, "+ userVM.username.value, modifier = Modifier.padding(top=5.dp))
+        }
+    }
+    
+    
+    
+    
 }
 
 @Composable

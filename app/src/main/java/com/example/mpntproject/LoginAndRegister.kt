@@ -4,11 +4,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 
 class LoginAndRegister: ViewModel() {
-    var username = mutableStateOf("Test")
+    var username = mutableStateOf("")
 
     fun register (Email: String, Password: String)
     {
