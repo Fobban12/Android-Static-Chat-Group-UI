@@ -9,7 +9,7 @@ import com.google.firebase.ktx.Firebase
 
 
 class LoginAndRegister: ViewModel() {
-    var username = mutableStateOf("")
+    var username = mutableStateOf("test")
 
     fun register (Email: String, Password: String)
     {
