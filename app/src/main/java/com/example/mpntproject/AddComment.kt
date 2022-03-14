@@ -13,4 +13,11 @@ class AddComment: ViewModel() {
         newComment.add(comment)
         comments.value = newComment
     }
+
+    fun deleteComment(comment: Comment)
+    {
+        val newComment = comments.value.toMutableList()
+        newComment.remove(comment)
+        comments.value = newComment
+    }
 }

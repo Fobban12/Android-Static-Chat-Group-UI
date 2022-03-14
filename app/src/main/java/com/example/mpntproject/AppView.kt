@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.font.FontWeight.Companion.ExtraBold
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,7 +59,7 @@ fun ScaffoldView()
     val navigation = rememberNavController()
     val userVM = viewModel<LoginAndRegister>()
     Scaffold(
-        topBar = {Header(userVM)},
+        topBar = {Header(userVM, navigation )},
         content = { MainNavigation(navigation) },
         bottomBar = { Footer(navigation)})
 }
@@ -65,24 +67,25 @@ fun ScaffoldView()
 
 
 @Composable
-fun Header(Logout:LoginAndRegister)
+fun Header(Logout:LoginAndRegister,navController: NavHostController )
 {
     Row(modifier = Modifier
         .fillMaxWidth()
         .background(Color.Cyan)
-        .padding(20.dp)
-        ,
-        horizontalArrangement = Arrangement.SpaceBetween
+        .padding(20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
 
 
     ) {
         Text("Sky News",Modifier
-            .padding(horizontal = 5.dp),
+            .padding(horizontal = 5.dp)
+            .clickable { navController.navigate(MAIN_ROUTE) },
             fontWeight = Bold)
 
-        Text("Searchbar?")
+        Text("Searchbar not implemented")
         Text("Logout", Modifier
-            .clickable { Logout.logout() })
+            .clickable { Logout.logout()},
+        fontWeight = Bold)
     }
 }
 @Composable
@@ -165,12 +168,14 @@ fun AddNewsComment(commentVM: AddComment, userVM: LoginAndRegister){
     )
 
     Column(modifier = Modifier
-        .fillMaxSize()) 
+        .fillMaxSize()
+        .padding(horizontal = 10.dp))
     {
-        Text(text= "You are user "+userVM.username.value)
+        Text(text= "You are user: "+userVM.username.value)
+        Text(text= "Press add comment to add an comment or press remove after writing which comment to delete.")
         OutlinedTextField(value = commentText
             , onValueChange ={commentText=it}
-            , label = { Text(text = "Add Comment to news")} )
+            , label = { Text(text = "Add or delete comment ")} )
 
         OutlinedButton(onClick = { if (commentText.isNotEmpty()){commentVM.addComment(Comment(commentText)); fireStore
             .collection("comments")
@@ -179,8 +184,12 @@ fun AddNewsComment(commentVM: AddComment, userVM: LoginAndRegister){
         {
             Text("Add comment")
         }
+        OutlinedButton(onClick = { if (commentText.isNotEmpty()){commentVM.deleteComment(Comment(commentText))} else {}}, Modifier.padding(top = 5.dp))
+        {
+            Text("Delete")
+        }
         commentVM.comments.value.forEach{
-        Text(text = it.comment +"                  Comment by user, "+ userVM.username.value, modifier = Modifier.padding(top=5.dp))
+        Text(text = it.comment +"                                  Comment by user, "+ userVM.username.value, modifier = Modifier.padding(top=25.dp))
         }
     }
     
